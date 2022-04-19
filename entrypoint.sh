@@ -84,6 +84,7 @@ update_certs () {
     # -alias unifi
 
     printf 'TODO: Implement import of %s and %s\n' "$cert_file" "$key_file" >&2
+    exit 1
 }
 
 
