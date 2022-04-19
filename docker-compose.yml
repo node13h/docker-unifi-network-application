@@ -1,0 +1,38 @@
+version: '3.1'
+
+secrets:
+  unifi-mongo-username:
+    external: true
+  unifi-mongo-password:
+    external: true
+
+services:
+  mongo:
+    image: mongo:4.4.13
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: admin
+    volumes:
+      - './compose/mongo-users.js:/docker-entrypoint-initdb.d/mongo-users.js:z'
+      - 'mongo-db:/data/db'
+      - /data/configdb
+  unifi:
+    image: docker.io/alikov/unifi-network-application
+    restart: always
+    environment:
+      UNIFI_MONGO_USERNAME_FILE: /run/secrets/unifi-mongo-username
+      UNIFI_MONGO_PASSWORD_FILE: /run/secrets/unifi-mongo-password
+      UNIFI_MONGO_HOSTS: 'mongo:27017'
+      UNIFI_MONGO_AUTH_DB: admin
+      UNIFI_MONGO_DB_NAME: unifi1
+    secrets:
+      - unifi-mongo-username
+      - unifi-mongo-password
+    volumes:
+      - 'unifi-data:/usr/lib/unifi/data'
+      - 'unifi-logs:/usr/lib/unifi/logs'
+    ports:
+      - "8443:8443"
+      - "8080:8080"
