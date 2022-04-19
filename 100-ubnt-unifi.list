@@ -1,1 +1,2 @@
-deb http://www.ubnt.com/downloads/unifi/debian stable ubiquiti
+# Same package for all architectures (Java)
+deb [arch=amd64] http://www.ubnt.com/downloads/unifi/debian stable ubiquiti
