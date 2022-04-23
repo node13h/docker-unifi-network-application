@@ -5,20 +5,19 @@ VERSION = $(shell cat VERSION)
 IMAGE_NAME = docker.io/alikov/unifi-network-application
 IMAGE_TAG = $(VERSION)
 
-TARGETARCH = $(shell podman run --rm ubuntu:$(UBUNTU_VERSION) arch | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
+TARGETARCH = $(shell podman --remote run --rm ubuntu:$(UBUNTU_VERSION) arch | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
 
 .PHONY: build update-versionlock compose compose-down compose-down-mrproper
 
 build:
-	podman build \
-	  -t $(IMAGE_NAME):$(IMAGE_TAG) \
+	podman --remote build \
+	  -t $(IMAGE_NAME):$(IMAGE_TAG)-$(TARGETARCH) \
 	  --build-arg TARGETARCH=$(TARGETARCH) \
 	  --build-arg UBUNTU_VERSION=$(UBUNTU_VERSION) \
 	  .
-	podman tag $(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_NAME):latest
 
 update-versionlock:
-	podman run -i --rm ubuntu:$(UBUNTU_VERSION) bash <generate-versionlock.sh >"versionlock-1001-$(TARGETARCH)"
+	podman --remote run -i --rm ubuntu:$(UBUNTU_VERSION) bash <generate-versionlock.sh >"versionlock-1001-$(TARGETARCH)"
 
 compose:
 	-podman secret rm unifi-mongo-username
@@ -36,4 +35,4 @@ compose-down-mrproper:
 # Might need to do systemctl --user enable --now podman.socket
 # See https://aquasecurity.github.io/trivy/v0.26.0/docs/advanced/container/podman/
 trivy-scan:
-	trivy image --ignore-unfixed $(IMAGE_NAME):$(IMAGE_TAG)
+	trivy image --ignore-unfixed $(IMAGE_NAME):$(IMAGE_TAG)-$(TARGETARCH)
