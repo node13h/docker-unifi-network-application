@@ -5,19 +5,27 @@ VERSION = $(shell cat VERSION)
 IMAGE_NAME = docker.io/alikov/unifi-network-application
 IMAGE_TAG = $(VERSION)
 
-TARGETARCH = $(shell podman --remote run --rm ubuntu:$(UBUNTU_VERSION) arch | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
+ifneq ($(CONTAINER_HOST),)
+PODMAN_REMOTE_FLAG := --remote
+endif
 
-.PHONY: build update-versionlock compose compose-down compose-down-mrproper
+TARGETARCH = $(shell podman $(PODMAN_REMOTE_FLAG) run --rm ubuntu:$(UBUNTU_VERSION) arch | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
+
+ifeq ($(TARGETARCH),)
+$(error TARGETARCH is not set!)
+endif
+
+.PHONY: build update-versionlock compose compose-down compose-down-mrproper trivy-scan
 
 build:
-	podman --remote build \
+	podman $(PODMAN_REMOTE_FLAG) build \
 	  -t $(IMAGE_NAME):$(IMAGE_TAG)-$(TARGETARCH) \
 	  --build-arg TARGETARCH=$(TARGETARCH) \
 	  --build-arg UBUNTU_VERSION=$(UBUNTU_VERSION) \
 	  .
 
 update-versionlock:
-	podman --remote run -i --rm ubuntu:$(UBUNTU_VERSION) bash <generate-versionlock.sh >"versionlock-1001-$(TARGETARCH)"
+	podman $(PODMAN_REMOTE_FLAG) run -i --rm ubuntu:$(UBUNTU_VERSION) bash <generate-versionlock.sh >"versionlock-1001-$(TARGETARCH)"
 
 compose:
 	-podman secret rm unifi-mongo-username
