@@ -5,17 +5,20 @@ VERSION = $(shell cat VERSION)
 IMAGE_NAME = docker.io/alikov/unifi-network-application
 IMAGE_TAG = $(VERSION)
 
+TARGETARCH = $(shell podman run --rm ubuntu:$(UBUNTU_VERSION) arch | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
+
 .PHONY: build update-versionlock compose compose-down compose-down-mrproper
 
 build:
 	podman build \
 	  -t $(IMAGE_NAME):$(IMAGE_TAG) \
+	  --build-arg TARGETARCH=$(TARGETARCH) \
 	  --build-arg UBUNTU_VERSION=$(UBUNTU_VERSION) \
 	  .
 	podman tag $(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_NAME):latest
 
 update-versionlock:
-	podman run -i ubuntu:$(UBUNTU_VERSION) bash <generate-versionlock.sh >versionlock-1001
+	podman run -i --rm ubuntu:$(UBUNTU_VERSION) bash <generate-versionlock.sh >"versionlock-1001-$(TARGETARCH)"
 
 compose:
 	-podman secret rm unifi-mongo-username

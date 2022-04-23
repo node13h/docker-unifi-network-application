@@ -1,7 +1,9 @@
 ARG UBUNTU_VERSION
 FROM ubuntu:${UBUNTU_VERSION}
 
-COPY versionlock-1001 /etc/apt/preferences.d/versionlock-1001
+ARG TARGETARCH
+
+COPY versionlock-1001-${TARGETARCH} /etc/apt/preferences.d/versionlock-1001
 
 RUN apt-get update \
     && apt-get upgrade -y \
