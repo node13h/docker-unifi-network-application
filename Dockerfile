@@ -21,9 +21,9 @@ RUN apt-get update \
 COPY --chmod=0755 unifi.sh /unifi.sh
 COPY --chmod=0755 entrypoint.sh /entrypoint.sh
 
-RUN install -o unifi -g unifi -d /usr/lib/unifi/data
-RUN install -o unifi -g unifi -d /usr/lib/unifi/logs
-RUN install -o unifi -g unifi -d /usr/lib/unifi/run
+RUN install -o unifi -g unifi -d /usr/lib/unifi/data \
+    && install -o unifi -g unifi -d /usr/lib/unifi/logs \
+    && install -o unifi -g unifi -d /usr/lib/unifi/run
 
 VOLUME ["/usr/lib/unifi/data", "/usr/lib/unifi/logs"]
 
