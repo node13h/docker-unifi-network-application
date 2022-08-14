@@ -1,3 +1,7 @@
+# TODO: Remove compose
+# TODO: Move container build commands into ci/scripts
+# TODO: Add container labels
+
 UBUNTU_VERSION = focal-20220404
 
 VERSION = $(shell cat VERSION)

@@ -34,3 +34,5 @@ WORKDIR /usr/lib/unifi
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/unifi.sh"]
+
+# TODO: Labels
